@@ -3,227 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ML Visualizer Tool</title>
+<title>ML Learning Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
-body{background:linear-gradient(135deg,#f0f4ff,#e0f7fa);color:#111}
-nav{display:flex;justify-content:center;gap:20px;background:#fff;padding:15px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
-nav a{cursor:pointer;color:#0077ff;font-weight:500}
-section{display:none;padding:30px}
-.active{display:block}
-h1{text-align:center;margin-bottom:20px}
-.card{background:#fff;padding:20px;border-radius:12px;margin:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1)}
-button{padding:10px 20px;background:#0077ff;color:#fff;border:none;border-radius:5px;cursor:pointer;margin:5px}
-input[type=range]{width:100%}
-canvas{background:#fff;border-radius:12px;margin-top:20px;display:block;margin-left:auto;margin-right:auto}
-.timeline-item{background:#fff;padding:10px;margin:5px;border-left:5px solid #0077ff}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background: linear-gradient(135deg,#f0f4ff,#e0f7fa); color:#111;}
+nav{display:flex;justify-content:center;gap:15px;background:#fff;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+nav a{cursor:pointer;color:#0077ff;font-weight:600;}
+section{display:none;padding:25px;}
+.active{display:block;}
+h1{text-align:center;margin-bottom:20px;}
+.card{background:#fff;padding:20px;border-radius:12px;margin:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+button{padding:10px 20px;background:#0077ff;color:#fff;border:none;border-radius:5px;cursor:pointer;margin:5px;}
+input[type=text], input[type=password]{width:100%;padding:10px;margin:5px 0 15px 0;border-radius:5px;border:1px solid #ccc;}
+.level-button{padding:10px 15px;margin:5px;background:#e0f7fa;border:none;border-radius:5px;cursor:pointer;}
+.level-button.completed{background:#0077ff;color:#fff;}
+#dashboardChart{max-width:600px;margin:20px auto;}
 </style>
 </head>
-
 <body>
 
 <nav>
 <a onclick="show('home')">Home</a>
-<a onclick="show('linear')">Linear Regression</a>
-<a onclick="show('classification')">Classification</a>
-<a onclick="show('theory')">Theory</a>
+<a onclick="show('login')">Login/Signup</a>
+<a onclick="show('explore')">Explore</a>
+<a onclick="show('practice')">Practice</a>
+<a onclick="show('dashboard')">Dashboard</a>
+<a onclick="logout()">Logout</a>
 </nav>
 
+<!-- HOME -->
 <section id="home" class="active">
-<h1>ML Visualizer Tool</h1>
+<h1>Welcome to ML Learning Platform</h1>
 <div class="card">
-This interactive web tool helps visualize basic ML concepts like Linear Regression and Classification.
+Learn Machine Learning from basics to advanced with 25 structured levels, practice quizzes, and track your progress visually.
 </div>
+<button onclick="show('login')">Get Started</button>
+</section>
+
+<!-- LOGIN/SIGNUP -->
+<section id="login">
+<h1>Login / Signup</h1>
 <div class="card">
-Adjust sliders, add points, watch models learn in real-time, and understand ML visually.
+<input type="text" id="username" placeholder="Username">
+<input type="password" id="password" placeholder="Password">
+<button onclick="signup()">Signup</button>
+<button onclick="login()">Login</button>
+<p id="loginMsg"></p>
 </div>
 </section>
 
-<section id="linear">
-<h1>Linear Regression Visualizer</h1>
-<div class="card">
-Click on the graph to add points. Adjust slope and intercept sliders to see the line fit your points.
-</div>
-<canvas id="lrCanvas" width="600" height="400"></canvas>
-<br>
-<label>Slope: <span id="slopeVal">1</span></label>
-<input type="range" id="slope" min="-5" max="5" step="0.1" value="1">
-<br>
-<label>Intercept: <span id="interceptVal">0</span></label>
-<input type="range" id="intercept" min="-200" max="200" step="1" value="0">
-<br>
-<button onclick="resetLR()">Reset</button>
-<button onclick="trainLR()">Auto Train (Gradient Descent)</button>
+<!-- EXPLORE -->
+<section id="explore">
+<h1>Explore ML Levels</h1>
+<div class="card" id="levelsContainer"></div>
+<div class="card" id="levelContent"></div>
+<button onclick="prevLevel()">Previous</button>
+<button onclick="nextLevel()">Next</button>
 </section>
 
-<section id="classification">
-<h1>Classification Visualizer</h1>
-<div class="card">
-Click to add red or blue points (Shift for blue). Adjust boundary slope/intercept sliders.
-</div>
-<canvas id="clsCanvas" width="600" height="400"></canvas>
-<br>
-<label>Boundary Slope: <span id="clsSlopeVal">1</span></label>
-<input type="range" id="clsSlope" min="-5" max="5" step="0.1" value="1">
-<br>
-<label>Boundary Intercept: <span id="clsInterceptVal">0</span></label>
-<input type="range" id="clsIntercept" min="-200" max="200" step="1" value="0">
-<br>
-<button onclick="resetCLS()">Reset</button>
+<!-- PRACTICE -->
+<section id="practice">
+<h1>Practice Questions</h1>
+<div class="card" id="practiceContent"></div>
+<button onclick="prevPractice()">Previous</button>
+<button onclick="nextPractice()">Next</button>
 </section>
 
-<section id="theory">
-<h1>ML Theory</h1>
+<!-- DASHBOARD -->
+<section id="dashboard">
+<h1>Progress Dashboard</h1>
 <div class="card">
-<h2>Linear Regression</h2>
-<p>Linear Regression fits a line to predict Y from X. The line is defined as Y = slope * X + intercept.</p>
-</div>
-<div class="card">
-<h2>Classification</h2>
-<p>Classification separates data into categories. Here we use a simple line boundary between two classes.</p>
-</div>
-<div class="card">
-<h2>Gradient Descent</h2>
-<p>Gradient Descent iteratively updates model parameters to reduce error between predicted and actual values.</p>
+<canvas id="dashboardChart" width="600" height="400"></canvas>
 </div>
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+// --- SESSION ---
+let currentUser = sessionStorage.getItem("currentUser");
+let progress = JSON.parse(localStorage.getItem("progress")) || {};
+
+// --- NAVIGATION ---
 function show(id){
 document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
 document.getElementById(id).classList.add('active');
+if(id==="explore") renderLevels();
+if(id==="dashboard") renderDashboard();
+if(id==="practice") renderPractice();
 }
 
-/* --- LINEAR REGRESSION --- */
-const lrCanvas = document.getElementById("lrCanvas");
-const lrCtx = lrCanvas.getContext("2d");
-let lrPoints = [];
-let slope = 1;
-let intercept = 0;
-
-function drawLR(){
-lrCtx.clearRect(0,0,600,400);
-lrCtx.fillStyle="red";
-lrPoints.forEach(p=>{
-lrCtx.beginPath();
-lrCtx.arc(p.x,p.y,5,0,2*Math.PI);
-lrCtx.fill();
-});
-// draw line
-lrCtx.strokeStyle="#0077ff";
-lrCtx.lineWidth=2;
-lrCtx.beginPath();
-lrCtx.moveTo(0, intercept);
-lrCtx.lineTo(600, slope*600 + intercept);
-lrCtx.stroke();
+// --- LOGIN/SIGNUP ---
+function signup(){
+let user=document.getElementById("username").value;
+let pass=document.getElementById("password").value;
+if(!user||!pass){document.getElementById("loginMsg").innerText="Fill all fields"; return;}
+let users=JSON.parse(localStorage.getItem("users"))||{};
+if(users[user]){document.getElementById("loginMsg").innerText="User exists"; return;}
+users[user]=pass;
+localStorage.setItem("users", JSON.stringify(users));
+document.getElementById("loginMsg").innerText="Signup successful. Login now.";
 }
 
-lrCanvas.addEventListener("click", e=>{
-const rect = lrCanvas.getBoundingClientRect();
-lrPoints.push({x:e.clientX-rect.left, y:e.clientY-rect.top});
-drawLR();
-});
-
-document.getElementById("slope").addEventListener("input", e=>{
-slope = parseFloat(e.target.value);
-document.getElementById("slopeVal").innerText = slope;
-drawLR();
-});
-
-document.getElementById("intercept").addEventListener("input", e=>{
-intercept = parseFloat(e.target.value);
-document.getElementById("interceptVal").innerText = intercept;
-drawLR();
-});
-
-function resetLR(){
-lrPoints=[];
-slope=1;
-intercept=0;
-document.getElementById("slope").value=1;
-document.getElementById("intercept").value=0;
-document.getElementById("slopeVal").innerText="1";
-document.getElementById("interceptVal").innerText="0";
-drawLR();
+function login(){
+let user=document.getElementById("username").value;
+let pass=document.getElementById("password").value;
+let users=JSON.parse(localStorage.getItem("users"))||{};
+if(users[user] && users[user]===pass){
+currentUser=user;
+sessionStorage.setItem("currentUser", user);
+document.getElementById("loginMsg").innerText="Login successful";
+show('explore');
+}else{
+document.getElementById("loginMsg").innerText="Invalid credentials";
+}
 }
 
-function trainLR(){
-if(lrPoints.length===0) return;
-let lr = 0.0005; // learning rate
-let steps = 1000;
-let i=0;
-let interval = setInterval(()=>{
-let dslope=0,dintercept=0;
-lrPoints.forEach(p=>{
-let yPred = slope*p.x + intercept;
-let error = yPred - p.y;
-dslope += 2*error*p.x;
-dintercept += 2*error;
-});
-slope -= lr*dslope/lrPoints.length;
-intercept -= lr*dintercept/lrPoints.length;
-document.getElementById("slopeVal").innerText = slope.toFixed(2);
-document.getElementById("interceptVal").innerText = intercept.toFixed(2);
-drawLR();
-i++;
-if(i>=steps) clearInterval(interval);
-},10);
+function logout(){
+currentUser=null;
+sessionStorage.removeItem("currentUser");
+show('login');
 }
 
-/* --- CLASSIFICATION --- */
-const clsCanvas = document.getElementById("clsCanvas");
-const clsCtx = clsCanvas.getContext("2d");
-let clsPoints = [];
-let clsSlope = 1;
-let clsIntercept = 0;
-
-function drawCLS(){
-clsCtx.clearRect(0,0,600,400);
-clsPoints.forEach(p=>{
-clsCtx.fillStyle=p.color;
-clsCtx.beginPath();
-clsCtx.arc(p.x,p.y,5,0,2*Math.PI);
-clsCtx.fill();
+// --- LEVELS DATA ---
+const levels=[];
+for(let i=1;i<=25;i++){
+levels.push({
+title:`Level ${i}`,
+content:`This is the content for Level ${i}. Explain ML concept here, give examples, diagrams, or mini demos.`
 });
-// draw boundary
-clsCtx.strokeStyle="#0077ff";
-clsCtx.lineWidth=2;
-clsCtx.beginPath();
-clsCtx.moveTo(0, clsIntercept);
-clsCtx.lineTo(600, clsSlope*600 + clsIntercept);
-clsCtx.stroke();
+}
+let currentLevel=0;
+
+function renderLevels(){
+let container=document.getElementById("levelsContainer");
+container.innerHTML="";
+levels.forEach((l,i)=>{
+let btn=document.createElement("button");
+btn.className="level-button";
+if(progress[currentUser] && progress[currentUser].levelsCompleted && progress[currentUser].levelsCompleted.includes(i)) btn.classList.add("completed");
+btn.innerText=l.title;
+btn.onclick=()=>{currentLevel=i; showLevel(i);};
+container.appendChild(btn);
+});
+showLevel(currentLevel);
 }
 
-clsCanvas.addEventListener("click", e=>{
-const rect = clsCanvas.getBoundingClientRect();
-let color = e.shiftKey ? "blue" : "red";
-clsPoints.push({x:e.clientX-rect.left, y:e.clientY-rect.top, color: color});
-drawCLS();
-});
+function showLevel(i){
+document.getElementById("levelContent").innerHTML=`<h3>${levels[i].title}</h3><p>${levels[i].content}</p>`;
+if(!progress[currentUser]) progress[currentUser]={levelsCompleted:[],practice:[]};
+if(!progress[currentUser].levelsCompleted.includes(i)) progress[currentUser].levelsCompleted.push(i);
+localStorage.setItem("progress", JSON.stringify(progress));
+renderLevels();
+}
 
-document.getElementById("clsSlope").addEventListener("input", e=>{
-clsSlope = parseFloat(e.target.value);
-document.getElementById("clsSlopeVal").innerText = clsSlope;
-drawCLS();
-});
+function nextLevel(){
+if(currentLevel<levels.length-1){currentLevel++; showLevel(currentLevel);}
+}
+function prevLevel(){
+if(currentLevel>0){currentLevel--; showLevel(currentLevel);}
+}
 
-document.getElementById("clsIntercept").addEventListener("input", e=>{
-clsIntercept = parseFloat(e.target.value);
-document.getElementById("clsInterceptVal").innerText = clsIntercept;
-drawCLS();
-});
+// --- PRACTICE DATA ---
+const practice=[
+{question:"ML is a subset of which field?", options:["AI","DS","Web Dev"], answer:0},
+{question:"Which algorithm is used for classification?", options:["Linear Regression","KNN","PCA"], answer:1},
+{question:"Gradient Descent helps in?", options:["Optimizing Loss","Sorting","Data Cleaning"], answer:0}
+];
+let currentPractice=0;
 
-function resetCLS(){
-clsPoints=[];
-clsSlope=1;
-clsIntercept=0;
-document.getElementById("clsSlope").value=1;
-document.getElementById("clsIntercept").value=0;
-document.getElementById("clsSlopeVal").innerText="1";
-document.getElementById("clsInterceptVal").innerText="0";
-drawCLS();
+function renderPractice(){
+let q=practice[currentPractice];
+let container=document.getElementById("practiceContent");
+container.innerHTML=`<h3>Q${currentPractice+1}: ${q.question}</h3>`;
+q.options.forEach((opt,i)=>{
+let btn=document.createElement("button");
+btn.innerText=opt;
+btn.onclick=()=>{if(i===q.answer){alert("Correct!");}else{alert("Wrong!");} if(!progress[currentUser].practice.includes(currentPractice)) progress[currentUser].practice.push(currentPractice); localStorage.setItem("progress",JSON.stringify(progress));};
+container.appendChild(btn);
+});
+}
+
+function nextPractice(){if(currentPractice<practice.length-1){currentPractice++; renderPractice();}}
+function prevPractice(){if(currentPractice>0){currentPractice--; renderPractice();}}
+
+// --- DASHBOARD ---
+function renderDashboard(){
+const ctx=document.getElementById("dashboardChart").getContext("2d");
+let completed=progress[currentUser] && progress[currentUser].levelsCompleted?progress[currentUser].levelsCompleted.length:0;
+let practiceDone=progress[currentUser] && progress[currentUser].practice?progress[currentUser].practice.length:0;
+new Chart(ctx,{
+type:"pie",
+data:{
+labels:["Levels Completed","Levels Remaining"],
+datasets:[{data:[completed,25-completed],backgroundColor:["#0077ff","#e0f7fa"]}]
+}
+});
 }
 
 </script>
