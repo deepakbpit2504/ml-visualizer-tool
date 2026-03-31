@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ML Visualizer Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif}
+body{background:linear-gradient(135deg,#f0f4ff,#e0f7fa);color:#111}
+nav{display:flex;justify-content:center;gap:20px;background:#fff;padding:15px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+nav a{cursor:pointer;color:#0077ff;font-weight:500}
+section{display:none;padding:30px}
+.active{display:block}
+h1{text-align:center;margin-bottom:20px}
+.card{background:#fff;padding:20px;border-radius:12px;margin:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1)}
+button{padding:10px 20px;background:#0077ff;color:#fff;border:none;border-radius:5px;cursor:pointer;margin:5px}
+input[type=range]{width:100%}
+canvas{background:#fff;border-radius:12px;margin-top:20px;display:block;margin-left:auto;margin-right:auto}
+.timeline-item{background:#fff;padding:10px;margin:5px;border-left:5px solid #0077ff}
+</style>
+</head>
+
+<body>
+
+<nav>
+<a onclick="show('home')">Home</a>
+<a onclick="show('linear')">Linear Regression</a>
+<a onclick="show('classification')">Classification</a>
+<a onclick="show('theory')">Theory</a>
+</nav>
+
+<section id="home" class="active">
+<h1>ML Visualizer Tool</h1>
+<div class="card">
+This interactive web tool helps visualize basic ML concepts like Linear Regression and Classification.
+</div>
+<div class="card">
+Adjust sliders, add points, watch models learn in real-time, and understand ML visually.
+</div>
+</section>
+
+<section id="linear">
+<h1>Linear Regression Visualizer</h1>
+<div class="card">
+Click on the graph to add points. Adjust slope and intercept sliders to see the line fit your points.
+</div>
+<canvas id="lrCanvas" width="600" height="400"></canvas>
+<br>
+<label>Slope: <span id="slopeVal">1</span></label>
+<input type="range" id="slope" min="-5" max="5" step="0.1" value="1">
+<br>
+<label>Intercept: <span id="interceptVal">0</span></label>
+<input type="range" id="intercept" min="-200" max="200" step="1" value="0">
+<br>
+<button onclick="resetLR()">Reset</button>
+<button onclick="trainLR()">Auto Train (Gradient Descent)</button>
+</section>
+
+<section id="classification">
+<h1>Classification Visualizer</h1>
+<div class="card">
+Click to add red or blue points (Shift for blue). Adjust boundary slope/intercept sliders.
+</div>
+<canvas id="clsCanvas" width="600" height="400"></canvas>
+<br>
+<label>Boundary Slope: <span id="clsSlopeVal">1</span></label>
+<input type="range" id="clsSlope" min="-5" max="5" step="0.1" value="1">
+<br>
+<label>Boundary Intercept: <span id="clsInterceptVal">0</span></label>
+<input type="range" id="clsIntercept" min="-200" max="200" step="1" value="0">
+<br>
+<button onclick="resetCLS()">Reset</button>
+</section>
+
+<section id="theory">
+<h1>ML Theory</h1>
+<div class="card">
+<h2>Linear Regression</h2>
+<p>Linear Regression fits a line to predict Y from X. The line is defined as Y = slope * X + intercept.</p>
+</div>
+<div class="card">
+<h2>Classification</h2>
+<p>Classification separates data into categories. Here we use a simple line boundary between two classes.</p>
+</div>
+<div class="card">
+<h2>Gradient Descent</h2>
+<p>Gradient Descent iteratively updates model parameters to reduce error between predicted and actual values.</p>
+</div>
+</section>
+
+<script>
+function show(id){
+document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+/* --- LINEAR REGRESSION --- */
+const lrCanvas = document.getElementById("lrCanvas");
+const lrCtx = lrCanvas.getContext("2d");
+let lrPoints = [];
+let slope = 1;
+let intercept = 0;
+
+function drawLR(){
+lrCtx.clearRect(0,0,600,400);
+lrCtx.fillStyle="red";
+lrPoints.forEach(p=>{
+lrCtx.beginPath();
+lrCtx.arc(p.x,p.y,5,0,2*Math.PI);
+lrCtx.fill();
+});
+// draw line
+lrCtx.strokeStyle="#0077ff";
+lrCtx.lineWidth=2;
+lrCtx.beginPath();
+lrCtx.moveTo(0, intercept);
+lrCtx.lineTo(600, slope*600 + intercept);
+lrCtx.stroke();
+}
+
+lrCanvas.addEventListener("click", e=>{
+const rect = lrCanvas.getBoundingClientRect();
+lrPoints.push({x:e.clientX-rect.left, y:e.clientY-rect.top});
+drawLR();
+});
+
+document.getElementById("slope").addEventListener("input", e=>{
+slope = parseFloat(e.target.value);
+document.getElementById("slopeVal").innerText = slope;
+drawLR();
+});
+
+document.getElementById("intercept").addEventListener("input", e=>{
+intercept = parseFloat(e.target.value);
+document.getElementById("interceptVal").innerText = intercept;
+drawLR();
+});
+
+function resetLR(){
+lrPoints=[];
+slope=1;
+intercept=0;
+document.getElementById("slope").value=1;
+document.getElementById("intercept").value=0;
+document.getElementById("slopeVal").innerText="1";
+document.getElementById("interceptVal").innerText="0";
+drawLR();
+}
+
+function trainLR(){
+if(lrPoints.length===0) return;
+let lr = 0.0005; // learning rate
+let steps = 1000;
+let i=0;
+let interval = setInterval(()=>{
+let dslope=0,dintercept=0;
+lrPoints.forEach(p=>{
+let yPred = slope*p.x + intercept;
+let error = yPred - p.y;
+dslope += 2*error*p.x;
+dintercept += 2*error;
+});
+slope -= lr*dslope/lrPoints.length;
+intercept -= lr*dintercept/lrPoints.length;
+document.getElementById("slopeVal").innerText = slope.toFixed(2);
+document.getElementById("interceptVal").innerText = intercept.toFixed(2);
+drawLR();
+i++;
+if(i>=steps) clearInterval(interval);
+},10);
+}
+
+/* --- CLASSIFICATION --- */
+const clsCanvas = document.getElementById("clsCanvas");
+const clsCtx = clsCanvas.getContext("2d");
+let clsPoints = [];
+let clsSlope = 1;
+let clsIntercept = 0;
+
+function drawCLS(){
+clsCtx.clearRect(0,0,600,400);
+clsPoints.forEach(p=>{
+clsCtx.fillStyle=p.color;
+clsCtx.beginPath();
+clsCtx.arc(p.x,p.y,5,0,2*Math.PI);
+clsCtx.fill();
+});
+// draw boundary
+clsCtx.strokeStyle="#0077ff";
+clsCtx.lineWidth=2;
+clsCtx.beginPath();
+clsCtx.moveTo(0, clsIntercept);
+clsCtx.lineTo(600, clsSlope*600 + clsIntercept);
+clsCtx.stroke();
+}
+
+clsCanvas.addEventListener("click", e=>{
+const rect = clsCanvas.getBoundingClientRect();
+let color = e.shiftKey ? "blue" : "red";
+clsPoints.push({x:e.clientX-rect.left, y:e.clientY-rect.top, color: color});
+drawCLS();
+});
+
+document.getElementById("clsSlope").addEventListener("input", e=>{
+clsSlope = parseFloat(e.target.value);
+document.getElementById("clsSlopeVal").innerText = clsSlope;
+drawCLS();
+});
+
+document.getElementById("clsIntercept").addEventListener("input", e=>{
+clsIntercept = parseFloat(e.target.value);
+document.getElementById("clsInterceptVal").innerText = clsIntercept;
+drawCLS();
+});
+
+function resetCLS(){
+clsPoints=[];
+clsSlope=1;
+clsIntercept=0;
+document.getElementById("clsSlope").value=1;
+document.getElementById("clsIntercept").value=0;
+document.getElementById("clsSlopeVal").innerText="1";
+document.getElementById("clsInterceptVal").innerText="0";
+drawCLS();
+}
+
+</script>
+</body>
+</html>
