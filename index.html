@@ -11,17 +11,59 @@ nav{background:#fff;padding:10px;text-align:center}
 nav a{margin:10px;cursor:pointer;color:#0077ff;font-weight:bold}
 section{display:none;padding:20px}
 .active{display:block}
-.card{background:#fff;padding:15px;border-radius:10px;margin:10px}
 
-.split{display:flex;gap:20px;flex-wrap:wrap}
-.left,.right{flex:1;min-width:280px}
+.card{
+background:#fff;
+padding:15px;
+border-radius:10px;
+margin:10px;
+}
 
-img{width:100%;border-radius:10px}
-iframe{width:100%;height:250px;border:none;border-radius:10px}
+.split{
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+}
 
-button{padding:8px 15px;margin:5px;background:#0077ff;color:#fff;border:none;border-radius:5px}
-input{padding:8px;margin:5px;width:200px}
-#chatBox{height:200px;overflow:auto;border:1px solid #ccc;padding:10px}
+.left,.right{
+flex:1;
+min-width:280px;
+}
+
+img{
+width:100%;
+border-radius:10px;
+}
+
+iframe{
+width:100%;
+height:250px;
+border:none;
+border-radius:10px;
+}
+
+button{
+padding:8px 15px;
+margin:5px;
+background:#0077ff;
+color:#fff;
+border:none;
+border-radius:5px;
+cursor:pointer;
+}
+
+input{
+padding:8px;
+margin:5px;
+width:200px;
+}
+
+#chatBox{
+height:200px;
+overflow:auto;
+border:1px solid #ccc;
+padding:10px;
+}
 </style>
 </head>
 
@@ -39,7 +81,7 @@ input{padding:8px;margin:5px;width:200px}
 
 <section id="home" class="active">
 <h2>ML Learning Platform</h2>
-<div class="card">Learn Machine Learning step-by-step</div>
+<div class="card">Learn ML step-by-step with visuals and videos</div>
 <button onclick="show('login')">Start</button>
 </section>
 
@@ -81,6 +123,7 @@ input{padding:8px;margin:5px;width:200px}
 </section>
 
 <script>
+
 let currentUser=sessionStorage.getItem("user");
 let progress=JSON.parse(localStorage.getItem("progress"))||{};
 let currentLevel=0,currentQ=0,chartInstance=null;
@@ -118,7 +161,7 @@ currentUser=null;
 show('login');
 }
 
-// LEVELS (ALL VERIFIED)
+// LEVELS (STABLE)
 const levelsDiv=document.getElementById("levels");
 
 const levels=[
@@ -129,7 +172,7 @@ content:`
 <p>Machine Learning allows systems to learn from data.</p>
 <div class="split">
 <div class="left">
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/66/ML_process.png">
+<img src="https://via.placeholder.com/500x300?text=Machine+Learning">
 </div>
 <div class="right">
 <iframe src="https://www.youtube.com/embed/ukzFI9rgwfU"></iframe>
@@ -143,7 +186,7 @@ content:`
 <p>Supervised, Unsupervised, Reinforcement</p>
 <div class="split">
 <div class="left">
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Machine_learning_types.png">
+<img src="https://via.placeholder.com/500x300?text=Types+of+ML">
 </div>
 <div class="right">
 <iframe src="https://www.youtube.com/embed/Cr6VqTRO1v0"></iframe>
@@ -154,10 +197,10 @@ content:`
 {
 title:"3. Linear Regression",
 content:`
-<p>y = mx + b predicts values</p>
+<p>y = mx + b</p>
 <div class="split">
 <div class="left">
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Linear_regression.svg">
+<img src="https://via.placeholder.com/500x300?text=Linear+Regression">
 </div>
 <div class="right">
 <iframe src="https://www.youtube.com/embed/nk2CQITm_eo"></iframe>
@@ -168,10 +211,10 @@ content:`
 {
 title:"4. Logistic Regression",
 content:`
-<p>Used for classification</p>
+<p>Classification model</p>
 <div class="split">
 <div class="left">
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Logistic-curve.svg">
+<img src="https://via.placeholder.com/500x300?text=Logistic+Regression">
 </div>
 <div class="right">
 <iframe src="https://www.youtube.com/embed/zM4VZR0px8E"></iframe>
@@ -185,7 +228,7 @@ content:`
 <p>Accuracy, Precision, Recall</p>
 <div class="split">
 <div class="left">
-<img src="https://upload.wikimedia.org/wikipedia/commons/2/26/Confusion_matrix.png">
+<img src="https://via.placeholder.com/500x300?text=Evaluation+Metrics">
 </div>
 <div class="right">
 <iframe src="https://www.youtube.com/embed/85dtiMz9tSo"></iframe>
@@ -196,10 +239,10 @@ content:`
 {
 title:"6. Overfitting",
 content:`
-<p>Overfitting memorizes data</p>
+<p>Overfitting vs Underfitting</p>
 <div class="split">
 <div class="left">
-<img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Overfitting.svg">
+<img src="https://via.placeholder.com/500x300?text=Overfitting">
 </div>
 <div class="right">
 <iframe src="https://www.youtube.com/embed/EehRcPo1WPs"></iframe>
@@ -210,10 +253,10 @@ content:`
 {
 title:"7. Clustering",
 content:`
-<p>K-means groups similar data</p>
+<p>K-means clustering</p>
 <div class="split">
 <div class="left">
-<img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/K-means_convergence.gif">
+<img src="https://via.placeholder.com/500x300?text=Clustering">
 </div>
 <div class="right">
 <iframe src="https://www.youtube.com/embed/4b5d3muPQmA"></iframe>
@@ -227,7 +270,7 @@ content:`
 <p>Brain-inspired models</p>
 <div class="split">
 <div class="left">
-<img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Colored_neural_network.svg">
+<img src="https://via.placeholder.com/500x300?text=Neural+Network">
 </div>
 <div class="right">
 <iframe src="https://www.youtube.com/embed/aircAruvnKk"></iframe>
@@ -300,16 +343,17 @@ data:{labels:["Levels Completed"],datasets:[{data:[done]}]}
 // CHATBOT
 function sendMsg(){
 let input=chatInput.value.toLowerCase();
-let reply="Ask ML topics";
+let reply="Ask about ML";
 
 if(input.includes("ml")) reply="ML learns from data.";
-if(input.includes("regression")) reply="Predicts values.";
+if(input.includes("regression")) reply="Regression predicts values.";
 
 chatBox.innerHTML+=`<p><b>You:</b> ${input}</p>`;
 chatBox.innerHTML+=`<p><b>AI:</b> ${reply}</p>`;
 chatInput.value="";
 }
+
 </script>
 
 </body>
-</html>>
+</html>
