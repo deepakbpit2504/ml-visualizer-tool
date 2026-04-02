@@ -15,6 +15,7 @@ section{display:none;padding:20px}
 button{padding:8px 15px;margin:5px;background:#0077ff;color:#fff;border:none;border-radius:5px;cursor:pointer}
 input{padding:8px;margin:5px;width:200px}
 img,iframe{max-width:100%;margin-top:10px;border-radius:8px}
+#chatBox{height:200px;overflow:auto;border:1px solid #ccc;padding:10px}
 </style>
 </head>
 
@@ -24,30 +25,27 @@ img,iframe{max-width:100%;margin-top:10px;border-radius:8px}
 <a onclick="show('home')">Home</a>
 <a onclick="show('login')">Login</a>
 <a onclick="show('explore')">Explore</a>
+<a onclick="show('quiz')">Quiz</a>
 <a onclick="show('dashboard')">Dashboard</a>
+<a onclick="show('chatbot')">Help AI</a>
 <a onclick="logout()">Logout</a>
 </nav>
 
-<!-- HOME -->
 <section id="home" class="active">
 <h2>ML Learning Platform</h2>
-<div class="card">
-Learn Machine Learning step by step with visuals, videos, and real examples.
-</div>
-<button onclick="show('login')">Get Started</button>
+<div class="card">Learn ML visually with levels, quizzes & AI help</div>
+<button onclick="show('login')">Start</button>
 </section>
 
-<!-- LOGIN -->
 <section id="login">
 <h2>Login / Signup</h2>
-<input id="user" placeholder="Username"><br>
-<input id="pass" placeholder="Password"><br>
+<input id="user"><br>
+<input id="pass"><br>
 <button onclick="signup()">Signup</button>
 <button onclick="login()">Login</button>
 <p id="msg"></p>
 </section>
 
-<!-- EXPLORE -->
 <section id="explore">
 <h2>Levels</h2>
 <div id="levels"></div>
@@ -56,209 +54,159 @@ Learn Machine Learning step by step with visuals, videos, and real examples.
 <button onclick="next()">Next</button>
 </section>
 
-<!-- DASHBOARD -->
+<section id="quiz">
+<h2>Smart Quiz</h2>
+<div class="card" id="quizBox"></div>
+<button onclick="nextQ()">Next</button>
+</section>
+
 <section id="dashboard">
-<h2>Progress</h2>
+<h2>Dashboard</h2>
 <canvas id="chart"></canvas>
+<button onclick="generateCertificate()">Download Certificate</button>
+</section>
+
+<section id="chatbot">
+<h2>AI Help</h2>
+<div class="card">
+<div id="chatBox"></div>
+<input id="chatInput">
+<button onclick="sendMsg()">Send</button>
+</div>
 </section>
 
 <script>
-
-let currentUser = sessionStorage.getItem("user");
-let progress = JSON.parse(localStorage.getItem("progress")) || {};
-let currentLevel = 0;
-let chartInstance = null;
+let currentUser=sessionStorage.getItem("user");
+let progress=JSON.parse(localStorage.getItem("progress"))||{};
+let scoreData=JSON.parse(localStorage.getItem("score"))||{};
+let currentLevel=0,currentQ=0,chartInstance=null;
 
 // NAV
 function show(id){
 document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
 document.getElementById(id).classList.add('active');
 
-if(id==="explore"){
-if(!currentUser){ alert("Login first"); show('login'); return;}
-renderLevels();
-}
-
-if(id==="dashboard"){
-renderChart();
-}
+if(id==="explore"){if(!currentUser){alert("Login first");show('login');return;}renderLevels();}
+if(id==="quiz"){renderQuiz();}
+if(id==="dashboard"){renderChart();}
 }
 
 // AUTH
 function signup(){
 let u=user.value,p=pass.value;
-if(!u||!p){msg.innerText="Fill fields";return;}
 let users=JSON.parse(localStorage.getItem("users"))||{};
-users[u]=p;
-localStorage.setItem("users",JSON.stringify(users));
+users[u]=p; localStorage.setItem("users",JSON.stringify(users));
 msg.innerText="Signup done";
 }
-
 function login(){
 let u=user.value,p=pass.value;
 let users=JSON.parse(localStorage.getItem("users"))||{};
-if(users[u]===p){
-currentUser=u;
-sessionStorage.setItem("user",u);
-msg.innerText="Login success";
-show('explore');
-}else msg.innerText="Wrong credentials";
+if(users[u]===p){currentUser=u;sessionStorage.setItem("user",u);show('explore');}
+else msg.innerText="Wrong";
 }
+function logout(){sessionStorage.clear();currentUser=null;show('login');}
 
-function logout(){
-sessionStorage.clear();
-currentUser=null;
-show('login');
-}
-
-// LEVELS (10 DETAILED)
-const levels = [
-
-{
-title:"Level 1: What is ML",
-content:`
-<h3>Machine Learning</h3>
-<p>ML allows computers to learn from data.</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/66/ML_process.png">
-<iframe height="250" src="https://www.youtube.com/embed/ukzFI9rgwfU"></iframe>
-`
-},
-
-{
-title:"Level 2: Types of ML",
-content:`
-<h3>Types</h3>
-<p>Supervised, Unsupervised, Reinforcement</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Machine_learning_types.png">
-<iframe height="250" src="https://www.youtube.com/embed/Cr6VqTRO1v0"></iframe>
-`
-},
-
-{
-title:"Level 3: Linear Regression",
-content:`
-<h3>Linear Regression</h3>
-<p>y = mx + b</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Linear_regression.svg">
-<iframe height="250" src="https://www.youtube.com/embed/aircAruvnKk"></iframe>
-`
-},
-
-{
-title:"Level 4: Logistic Regression",
-content:`
-<h3>Logistic Regression</h3>
-<p>Used for classification</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Logistic-curve.svg">
-<iframe height="250" src="https://www.youtube.com/embed/zM4VZR0px8E"></iframe>
-`
-},
-
-{
-title:"Level 5: Evaluation Metrics",
-content:`
-<h3>Metrics</h3>
-<p>Accuracy, Precision, Recall</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/2/26/Confusion_matrix.png">
-<iframe height="250" src="https://www.youtube.com/embed/85dtiMz9tSo"></iframe>
-`
-},
-
-{
-title:"Level 6: Overfitting",
-content:`
-<h3>Overfitting</h3>
-<p>Model memorizes data</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Overfitting.svg">
-<iframe height="250" src="https://www.youtube.com/embed/EehRcPo1WPs"></iframe>
-`
-},
-
-{
-title:"Level 7: Feature Engineering",
-content:`
-<h3>Feature Engineering</h3>
-<p>Transform data into features</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Data_preprocessing.svg">
-<iframe height="250" src="https://www.youtube.com/embed/0xVqLJe9_CY"></iframe>
-`
-},
-
-{
-title:"Level 8: Clustering",
-content:`
-<h3>K-Means</h3>
-<p>Grouping data</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/K-means_convergence.gif">
-<iframe height="250" src="https://www.youtube.com/embed/4b5d3muPQmA"></iframe>
-`
-},
-
-{
-title:"Level 9: Neural Networks",
-content:`
-<h3>Neural Networks</h3>
-<p>Brain-inspired model</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Colored_neural_network.svg">
-<iframe height="250" src="https://www.youtube.com/embed/aircAruvnKk"></iframe>
-`
-},
-
-{
-title:"Level 10: Deep Learning",
-content:`
-<h3>Deep Learning</h3>
-<p>Advanced ML</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/63/Deep_learning.png">
-<iframe height="250" src="https://www.youtube.com/embed/6M5VXKLf4D4"></iframe>
-`
-}
-
+// LEVELS (10 detailed)
+const levels=[
+{title:"ML Basics",content:`<h3>Machine Learning</h3><img src="https://upload.wikimedia.org/wikipedia/commons/6/66/ML_process.png"><iframe height="250" src="https://www.youtube.com/embed/ukzFI9rgwfU"></iframe>`},
+{title:"Types",content:`<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Machine_learning_types.png"><iframe height="250" src="https://www.youtube.com/embed/Cr6VqTRO1v0"></iframe>`},
+{title:"Linear Regression",content:`<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Linear_regression.svg"><iframe height="250" src="https://www.youtube.com/embed/nk2CQITm_eo"></iframe>`},
+{title:"Logistic Regression",content:`<img src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Logistic-curve.svg"><iframe height="250" src="https://www.youtube.com/embed/zM4VZR0px8E"></iframe>`},
+{title:"Evaluation",content:`<img src="https://upload.wikimedia.org/wikipedia/commons/2/26/Confusion_matrix.png">`},
+{title:"Overfitting",content:`<img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Overfitting.svg">`},
+{title:"Feature Eng",content:`<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Data_preprocessing.svg">`},
+{title:"Clustering",content:`<img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/K-means_convergence.gif">`},
+{title:"Neural Net",content:`<img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Colored_neural_network.svg">`},
+{title:"Deep Learning",content:`<img src="https://upload.wikimedia.org/wikipedia/commons/6/63/Deep_learning.png">`}
 ];
 
 function renderLevels(){
-let div=document.getElementById("levels");
-div.innerHTML="";
+levels.innerHTML="";
 levels.forEach((l,i)=>{
 let b=document.createElement("button");
-b.innerText="Level "+(i+1);
+b.innerText=l.title;
 b.onclick=()=>{currentLevel=i;showLevel();}
-div.appendChild(b);
+levels.appendChild(b);
 });
 showLevel();
 }
 
 function showLevel(){
-let c=document.getElementById("content");
-c.innerHTML=levels[currentLevel].content;
-
-// save progress
+content.innerHTML=levels[currentLevel].content;
 if(!progress[currentUser]) progress[currentUser]=[];
 if(!progress[currentUser].includes(currentLevel))
 progress[currentUser].push(currentLevel);
-
 localStorage.setItem("progress",JSON.stringify(progress));
 }
 
-function next(){ if(currentLevel<levels.length-1){currentLevel++;showLevel();}}
-function prev(){ if(currentLevel>0){currentLevel--;showLevel();}}
+function next(){if(currentLevel<9){currentLevel++;showLevel();}}
+function prev(){if(currentLevel>0){currentLevel--;showLevel();}}
+
+// SMART QUIZ
+const quizLevels=[
+[{q:"ML stands for?",o:["Machine Learning","Mega Logic"],a:0}],
+[{q:"Supervised uses?",o:["Labeled","Random"],a:0}],
+[{q:"Regression predicts?",o:["Number","Class"],a:0}]
+];
+
+function renderQuiz(){
+let qSet=quizLevels[currentLevel]||quizLevels[0];
+let q=qSet[0];
+quizBox.innerHTML=`<h3>${q.q}</h3>`;
+q.o.forEach((opt,i)=>{
+let b=document.createElement("button");
+b.innerText=opt;
+b.onclick=()=>{
+if(i===q.a){
+alert("Correct");
+scoreData[currentUser]=(scoreData[currentUser]||0)+1;
+}else alert("Wrong");
+localStorage.setItem("score",JSON.stringify(scoreData));
+};
+quizBox.appendChild(b);
+});
+}
+function nextQ(){currentQ=0;renderQuiz();}
 
 // DASHBOARD
 function renderChart(){
-let done = progress[currentUser]?progress[currentUser].length:0;
+let done=progress[currentUser]?progress[currentUser].length:0;
+let score=scoreData[currentUser]||0;
 let ctx=document.getElementById("chart");
-
 if(chartInstance) chartInstance.destroy();
 
 chartInstance=new Chart(ctx,{
-type:'pie',
-data:{
-labels:['Completed','Remaining'],
-datasets:[{data:[done,10-done]}]
-}
+type:'bar',
+data:{labels:["Levels","Score"],datasets:[{data:[done,score]}]}
 });
 }
 
+// CERTIFICATE
+function generateCertificate(){
+let done=progress[currentUser]?.length||0;
+if(done<10){alert("Complete all levels");return;}
+let win=window.open("");
+win.document.write(`<h1 style="text-align:center">Certificate</h1>
+<h2 style="text-align:center">${currentUser}</h2>
+<p style="text-align:center">Completed ML Course</p>`);
+win.print();
+}
+
+// CHATBOT
+function sendMsg(){
+let input=chatInput.value.toLowerCase();
+let reply="Try asking about ML";
+
+if(input.includes("ml")) reply="ML means learning from data.";
+else if(input.includes("regression")) reply="Regression predicts values.";
+else if(input.includes("overfitting")) reply="Model memorizes data.";
+else if(input.includes("clustering")) reply="Groups similar data.";
+
+chatBox.innerHTML+=`<p><b>You:</b> ${input}</p>`;
+chatBox.innerHTML+=`<p><b>AI:</b> ${reply}</p>`;
+chatInput.value="";
+}
 </script>
+
 </body>
 </html>
