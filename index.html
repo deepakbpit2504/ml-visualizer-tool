@@ -1,244 +1,264 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ML Learning Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
-body{background: linear-gradient(135deg,#f0f4ff,#e0f7fa); color:#111;}
-nav{display:flex;justify-content:center;gap:15px;background:#fff;padding:12px;box-shadow:0 2px 8px rgba(0,0,0,0.1);position:sticky;top:0;z-index:10;}
-nav a{cursor:pointer;color:#0077ff;font-weight:600;text-decoration:none;}
-section{display:none;padding:25px;}
-.active{display:block;}
-h1{text-align:center;margin-bottom:20px;}
-.card{background:#fff;padding:20px;border-radius:12px;margin:10px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-button{padding:10px 20px;background:#0077ff;color:#fff;border:none;border-radius:5px;cursor:pointer;margin:5px;}
-input[type=text], input[type=password]{width:100%;padding:10px;margin:5px 0 15px 0;border-radius:5px;border:1px solid #ccc;}
-.level-button{padding:10px 15px;margin:5px;background:#e0f7fa;border:none;border-radius:5px;cursor:pointer;}
-.level-button.completed{background:#0077ff;color:#fff;}
-#dashboardChart, #lineChart{max-width:600px;margin:20px auto;}
-img, video{max-width:100%;border-radius:8px;margin:10px 0;}
-iframe{max-width:100%;border-radius:8px;margin:10px 0;}
+body{font-family:Poppins;background:#eef;margin:0}
+nav{background:#fff;padding:10px;text-align:center}
+nav a{margin:10px;cursor:pointer;color:#0077ff;font-weight:bold}
+section{display:none;padding:20px}
+.active{display:block}
+.card{background:#fff;padding:15px;border-radius:10px;margin:10px}
+button{padding:8px 15px;margin:5px;background:#0077ff;color:#fff;border:none;border-radius:5px;cursor:pointer}
+input{padding:8px;margin:5px;width:200px}
+img,iframe{max-width:100%;margin-top:10px;border-radius:8px}
 </style>
 </head>
+
 <body>
 
 <nav>
 <a onclick="show('home')">Home</a>
-<a onclick="show('login')">Login/Signup</a>
+<a onclick="show('login')">Login</a>
 <a onclick="show('explore')">Explore</a>
-<a onclick="show('practice')">Practice</a>
 <a onclick="show('dashboard')">Dashboard</a>
 <a onclick="logout()">Logout</a>
 </nav>
 
 <!-- HOME -->
 <section id="home" class="active">
-<h1>Welcome to ML Learning Platform</h1>
+<h2>ML Learning Platform</h2>
 <div class="card">
-Learn Machine Learning from basics to advanced with 25 structured levels, interactive visuals, videos, practice quizzes, and progress tracking.
+Learn Machine Learning step by step with visuals, videos, and real examples.
 </div>
 <button onclick="show('login')">Get Started</button>
 </section>
 
-<!-- LOGIN/SIGNUP -->
+<!-- LOGIN -->
 <section id="login">
-<h1>Login / Signup</h1>
-<div class="card">
-<input type="text" id="username" placeholder="Username">
-<input type="password" id="password" placeholder="Password">
+<h2>Login / Signup</h2>
+<input id="user" placeholder="Username"><br>
+<input id="pass" placeholder="Password"><br>
 <button onclick="signup()">Signup</button>
 <button onclick="login()">Login</button>
-<p id="loginMsg"></p>
-</div>
+<p id="msg"></p>
 </section>
 
 <!-- EXPLORE -->
 <section id="explore">
-<h1>Explore ML Levels</h1>
-<div class="card" id="levelsContainer"></div>
-<div class="card" id="levelContent"></div>
-<button onclick="prevLevel()">Previous</button>
-<button onclick="nextLevel()">Next</button>
-</section>
-
-<!-- PRACTICE -->
-<section id="practice">
-<h1>Practice Questions</h1>
-<div class="card" id="practiceContent"></div>
-<button onclick="prevPractice()">Previous</button>
-<button onclick="nextPractice()">Next</button>
+<h2>Levels</h2>
+<div id="levels"></div>
+<div class="card" id="content"></div>
+<button onclick="prev()">Prev</button>
+<button onclick="next()">Next</button>
 </section>
 
 <!-- DASHBOARD -->
 <section id="dashboard">
-<h1>Progress Dashboard</h1>
-<div class="card">
-<h3>Levels Completed</h3>
-<canvas id="dashboardChart" width="600" height="400"></canvas>
-<h3>Practice Progress</h3>
-<canvas id="lineChart" width="600" height="400"></canvas>
-</div>
+<h2>Progress</h2>
+<canvas id="chart"></canvas>
 </section>
 
 <script>
-// --- SESSION & PROGRESS ---
-let currentUser = sessionStorage.getItem("currentUser");
-let progress = JSON.parse(localStorage.getItem("progress")) || {};
 
-// --- NAVIGATION ---
+let currentUser = sessionStorage.getItem("user");
+let progress = JSON.parse(localStorage.getItem("progress")) || {};
+let currentLevel = 0;
+let chartInstance = null;
+
+// NAV
 function show(id){
 document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));
 document.getElementById(id).classList.add('active');
-if(id==="explore") renderLevels();
-if(id==="dashboard") renderDashboard();
-if(id==="practice") renderPractice();
+
+if(id==="explore"){
+if(!currentUser){ alert("Login first"); show('login'); return;}
+renderLevels();
 }
 
-// --- LOGIN/SIGNUP ---
+if(id==="dashboard"){
+renderChart();
+}
+}
+
+// AUTH
 function signup(){
-let user=document.getElementById("username").value;
-let pass=document.getElementById("password").value;
-if(!user||!pass){document.getElementById("loginMsg").innerText="Fill all fields"; return;}
+let u=user.value,p=pass.value;
+if(!u||!p){msg.innerText="Fill fields";return;}
 let users=JSON.parse(localStorage.getItem("users"))||{};
-if(users[user]){document.getElementById("loginMsg").innerText="User exists"; return;}
-users[user]=pass;
-localStorage.setItem("users", JSON.stringify(users));
-document.getElementById("loginMsg").innerText="Signup successful. Login now.";
+users[u]=p;
+localStorage.setItem("users",JSON.stringify(users));
+msg.innerText="Signup done";
 }
 
 function login(){
-let user=document.getElementById("username").value;
-let pass=document.getElementById("password").value;
+let u=user.value,p=pass.value;
 let users=JSON.parse(localStorage.getItem("users"))||{};
-if(users[user] && users[user]===pass){
-currentUser=user;
-sessionStorage.setItem("currentUser", user);
-document.getElementById("loginMsg").innerText="Login successful";
+if(users[u]===p){
+currentUser=u;
+sessionStorage.setItem("user",u);
+msg.innerText="Login success";
 show('explore');
-}else{
-document.getElementById("loginMsg").innerText="Invalid credentials";
-}
+}else msg.innerText="Wrong credentials";
 }
 
 function logout(){
+sessionStorage.clear();
 currentUser=null;
-sessionStorage.removeItem("currentUser");
 show('login');
 }
 
-// --- LEVELS DATA (25 Levels with free images & YouTube videos) ---
+// LEVELS (10 DETAILED)
 const levels = [
+
 {
-title:"Level 1: What is ML?",
-content:`<h3>What is Machine Learning?</h3>
-<p>Machine Learning allows computers to learn from data without explicit programming. Example: Spam detection.</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/66/ML_process.png" alt="ML Process Diagram">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/ukzFI9rgwfU" title="ML Introduction" frameborder="0" allowfullscreen></iframe>
-<canvas id="chart1" width="400" height="200"></canvas>`
+title:"Level 1: What is ML",
+content:`
+<h3>Machine Learning</h3>
+<p>ML allows computers to learn from data.</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/6/66/ML_process.png">
+<iframe height="250" src="https://www.youtube.com/embed/ukzFI9rgwfU"></iframe>
+`
 },
+
 {
 title:"Level 2: Types of ML",
-content:`<h3>Types of Machine Learning</h3>
-<p>Supervised, Unsupervised, and Reinforcement Learning.</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Machine_learning_types.png" alt="Types of ML">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Cr6VqTRO1v0" title="ML Types" frameborder="0" allowfullscreen></iframe>
-<canvas id="chart2" width="400" height="200"></canvas>`
+content:`
+<h3>Types</h3>
+<p>Supervised, Unsupervised, Reinforcement</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Machine_learning_types.png">
+<iframe height="250" src="https://www.youtube.com/embed/Cr6VqTRO1v0"></iframe>
+`
 },
+
 {
 title:"Level 3: Linear Regression",
-content:`<h3>Linear Regression</h3>
-<p>Predict continuous values using y = mx + b.</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Linear_regression.svg" alt="Linear Regression">
-<iframe width="560" height="315" src="https://www.youtube.com/embed/aircAruvnKk" title="Linear Regression Video" frameborder="0" allowfullscreen></iframe>
-<canvas id="chart3" width="400" height="200"></canvas>`
+content:`
+<h3>Linear Regression</h3>
+<p>y = mx + b</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Linear_regression.svg">
+<iframe height="250" src="https://www.youtube.com/embed/aircAruvnKk"></iframe>
+`
 },
-// --- Levels 4 to 25 ---
-];
 
-// Fill the remaining levels dynamically
-for(let i=4;i<=25;i++){
-levels.push({
-title:`Level ${i}`,
-content:`<h3>Level ${i} Content</h3>
-<p>Explanation, examples, and interactive demo for Level ${i}.</p>
-<iframe width="560" height="315" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Video placeholder" frameborder="0" allowfullscreen></iframe>
-<canvas id="chart${i}" width="400" height="200"></canvas>`
-});
+{
+title:"Level 4: Logistic Regression",
+content:`
+<h3>Logistic Regression</h3>
+<p>Used for classification</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Logistic-curve.svg">
+<iframe height="250" src="https://www.youtube.com/embed/zM4VZR0px8E"></iframe>
+`
+},
+
+{
+title:"Level 5: Evaluation Metrics",
+content:`
+<h3>Metrics</h3>
+<p>Accuracy, Precision, Recall</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/2/26/Confusion_matrix.png">
+<iframe height="250" src="https://www.youtube.com/embed/85dtiMz9tSo"></iframe>
+`
+},
+
+{
+title:"Level 6: Overfitting",
+content:`
+<h3>Overfitting</h3>
+<p>Model memorizes data</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Overfitting.svg">
+<iframe height="250" src="https://www.youtube.com/embed/EehRcPo1WPs"></iframe>
+`
+},
+
+{
+title:"Level 7: Feature Engineering",
+content:`
+<h3>Feature Engineering</h3>
+<p>Transform data into features</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Data_preprocessing.svg">
+<iframe height="250" src="https://www.youtube.com/embed/0xVqLJe9_CY"></iframe>
+`
+},
+
+{
+title:"Level 8: Clustering",
+content:`
+<h3>K-Means</h3>
+<p>Grouping data</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/K-means_convergence.gif">
+<iframe height="250" src="https://www.youtube.com/embed/4b5d3muPQmA"></iframe>
+`
+},
+
+{
+title:"Level 9: Neural Networks",
+content:`
+<h3>Neural Networks</h3>
+<p>Brain-inspired model</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Colored_neural_network.svg">
+<iframe height="250" src="https://www.youtube.com/embed/aircAruvnKk"></iframe>
+`
+},
+
+{
+title:"Level 10: Deep Learning",
+content:`
+<h3>Deep Learning</h3>
+<p>Advanced ML</p>
+<img src="https://upload.wikimedia.org/wikipedia/commons/6/63/Deep_learning.png">
+<iframe height="250" src="https://www.youtube.com/embed/6M5VXKLf4D4"></iframe>
+`
 }
 
-let currentLevel=0;
+];
 
 function renderLevels(){
-let container=document.getElementById("levelsContainer");
-container.innerHTML="";
+let div=document.getElementById("levels");
+div.innerHTML="";
 levels.forEach((l,i)=>{
-let btn=document.createElement("button");
-btn.className="level-button";
-if(progress[currentUser] && progress[currentUser].levelsCompleted && progress[currentUser].levelsCompleted.includes(i)) btn.classList.add("completed");
-btn.innerText=l.title;
-btn.onclick=()=>{currentLevel=i; showLevel(i);};
-container.appendChild(btn);
+let b=document.createElement("button");
+b.innerText="Level "+(i+1);
+b.onclick=()=>{currentLevel=i;showLevel();}
+div.appendChild(b);
 });
-showLevel(currentLevel);
+showLevel();
 }
 
-function showLevel(i){
-document.getElementById("levelContent").innerHTML=levels[i].content;
-if(!progress[currentUser]) progress[currentUser]={levelsCompleted:[],practice:[]};
-if(!progress[currentUser].levelsCompleted.includes(i)) progress[currentUser].levelsCompleted.push(i);
-localStorage.setItem("progress", JSON.stringify(progress));
-renderLevels();
+function showLevel(){
+let c=document.getElementById("content");
+c.innerHTML=levels[currentLevel].content;
 
-// Example Chart.js for each level
-const ctx = document.getElementById(`chart${i}`).getContext('2d');
-new Chart(ctx,{
-type:'bar',
-data:{labels:['A','B','C'], datasets:[{label:'Sample Data', data:[i*2,i*3,i*4], backgroundColor:'#0077ff'}]},
-options:{responsive:true}
-});
+// save progress
+if(!progress[currentUser]) progress[currentUser]=[];
+if(!progress[currentUser].includes(currentLevel))
+progress[currentUser].push(currentLevel);
+
+localStorage.setItem("progress",JSON.stringify(progress));
 }
 
-function nextLevel(){if(currentLevel<levels.length-1){currentLevel++; showLevel(currentLevel);}}
-function prevLevel(){if(currentLevel>0){currentLevel--; showLevel(currentLevel);}}
+function next(){ if(currentLevel<levels.length-1){currentLevel++;showLevel();}}
+function prev(){ if(currentLevel>0){currentLevel--;showLevel();}}
 
-// --- PRACTICE ---
-const practice=[
-{question:"ML is a subset of which field?", options:["AI","DS","Web Dev"], answer:0},
-{question:"Which algorithm is used for classification?", options:["Linear Regression","KNN","PCA"], answer:1},
-{question:"Gradient Descent helps in?", options:["Optimizing Loss","Sorting","Data Cleaning"], answer:0}
-];
-let currentPractice=0;
+// DASHBOARD
+function renderChart(){
+let done = progress[currentUser]?progress[currentUser].length:0;
+let ctx=document.getElementById("chart");
 
-function renderPractice(){
-let q=practice[currentPractice];
-let container=document.getElementById("practiceContent");
-container.innerHTML=`<h3>Q${currentPractice+1}: ${q.question}</h3>`;
-q.options.forEach((opt,i)=>{
-let btn=document.createElement("button");
-btn.innerText=opt;
-btn.onclick=()=>{if(i===q.answer){alert("Correct!");}else{alert("Wrong!");} if(!progress[currentUser].practice.includes(currentPractice)) progress[currentUser].practice.push(currentPractice); localStorage.setItem("progress",JSON.stringify(progress));};
-container.appendChild(btn);
+if(chartInstance) chartInstance.destroy();
+
+chartInstance=new Chart(ctx,{
+type:'pie',
+data:{
+labels:['Completed','Remaining'],
+datasets:[{data:[done,10-done]}]
+}
 });
 }
 
-function nextPractice(){if(currentPractice<practice.length-1){currentPractice++; renderPractice();}}
-function prevPractice(){if(currentPractice>0){currentPractice--; renderPractice();}}
-
-// --- DASHBOARD ---
-function renderDashboard(){
-const ctx=document.getElementById("dashboardChart").getContext("2d");
-let completed=progress[currentUser] && progress[currentUser].levelsCompleted?progress[currentUser].levelsCompleted.length:0;
-new Chart(ctx,{type:"pie",data:{labels:["Completed","Remaining"],datasets:[{data:[completed,25-completed],backgroundColor:["#0077ff","#e0f7fa"]}]}});
-
-const ctx2=document.getElementById("lineChart").getContext("2d");
-let practiceDone=progress[currentUser] && progress[currentUser].practice?progress[currentUser].practice.length:0;
-new Chart(ctx2,{type:"line",data:{labels:["Start","Mid","Current"],datasets:[{label:"Practice Progress",data:[0,practiceDone,practiceDone],borderColor:"#0077ff",fill:false}]}});
-
-}
 </script>
 </body>
 </html>
