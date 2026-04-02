@@ -14,7 +14,7 @@ section{display:none;padding:20px}
 .card{background:#fff;padding:15px;border-radius:10px;margin:10px}
 button{padding:8px 15px;margin:5px;background:#0077ff;color:#fff;border:none;border-radius:5px;cursor:pointer}
 input{padding:8px;margin:5px;width:200px}
-img,iframe{max-width:100%;margin-top:10px;border-radius:8px}
+img,iframe{width:100%;margin-top:10px;border-radius:8px}
 #chatBox{height:200px;overflow:auto;border:1px solid #ccc;padding:10px}
 </style>
 </head>
@@ -33,7 +33,7 @@ img,iframe{max-width:100%;margin-top:10px;border-radius:8px}
 
 <section id="home" class="active">
 <h2>ML Learning Platform</h2>
-<div class="card">Learn ML with levels, quizzes, dashboard & AI help</div>
+<div class="card">Learn ML with visuals, quizzes & AI help</div>
 <button onclick="show('login')">Start</button>
 </section>
 
@@ -63,7 +63,6 @@ img,iframe{max-width:100%;margin-top:10px;border-radius:8px}
 <section id="dashboard">
 <h2>Dashboard</h2>
 <canvas id="chart"></canvas>
-<button onclick="generateCertificate()">Download Certificate</button>
 </section>
 
 <section id="chatbot">
@@ -76,7 +75,6 @@ img,iframe{max-width:100%;margin-top:10px;border-radius:8px}
 </section>
 
 <script>
-
 let currentUser=sessionStorage.getItem("user");
 let progress=JSON.parse(localStorage.getItem("progress"))||{};
 let scoreData=JSON.parse(localStorage.getItem("score"))||{};
@@ -117,76 +115,74 @@ currentUser=null;
 show('login');
 }
 
-// LEVELS
+// LEVELS (FIXED MEDIA)
 const levelsDiv=document.getElementById("levels");
 
 const levels=[
-
 {
 title:"ML Basics",
 content:`<h3>Machine Learning</h3>
 <p>ML allows systems to learn from data.</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/66/ML_process.png">
-<iframe height="250" src="https://www.youtube.com/embed/ukzFI9rgwfU"></iframe>`
+<img src="https://images.unsplash.com/photo-1581091870622-1e7e4c0b2b4b">
+<iframe src="https://www.youtube.com/embed/ukzFI9rgwfU" allowfullscreen></iframe>`
 },
 
 {
 title:"Types of ML",
 content:`<p>Supervised, Unsupervised, Reinforcement</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Machine_learning_types.png">
-<iframe height="250" src="https://www.youtube.com/embed/Cr6VqTRO1v0"></iframe>`
+<img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c">
+<iframe src="https://www.youtube.com/embed/Cr6VqTRO1v0" allowfullscreen></iframe>`
 },
 
 {
 title:"Linear Regression",
-content:`<p>Predict continuous values (y = mx + b)</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Linear_regression.svg">
-<iframe height="250" src="https://www.youtube.com/embed/nk2CQITm_eo"></iframe>`
+content:`<p>y = mx + b</p>
+<img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71">
+<iframe src="https://www.youtube.com/embed/nk2CQITm_eo" allowfullscreen></iframe>`
 },
 
 {
 title:"Logistic Regression",
 content:`<p>Classification model</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/6d/Logistic-curve.svg">
-<iframe height="250" src="https://www.youtube.com/embed/zM4VZR0px8E"></iframe>`
+<img src="https://images.unsplash.com/photo-1559526324-593bc073d938">
+<iframe src="https://www.youtube.com/embed/zM4VZR0px8E" allowfullscreen></iframe>`
 },
 
 {
 title:"Evaluation",
 content:`<p>Accuracy, Precision, Recall</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/2/26/Confusion_matrix.png">`
+<img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71">`
 },
 
 {
 title:"Overfitting",
-content:`<p>Overfitting = memorization, Underfitting = too simple</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/1/19/Overfitting.svg">`
+content:`<p>Overfitting vs Underfitting</p>
+<img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c">`
 },
 
 {
 title:"Feature Engineering",
 content:`<p>Transform raw data</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Data_preprocessing.svg">`
+<img src="https://images.unsplash.com/photo-1581091215367-59ab6b8f90c8">`
 },
 
 {
 title:"Clustering",
-content:`<p>K-means groups data</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/e/ea/K-means_convergence.gif">`
+content:`<p>K-means grouping</p>
+<img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31">`
 },
 
 {
 title:"Neural Networks",
-content:`<p>Brain-inspired models</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/4/46/Colored_neural_network.svg">`
+content:`<p>Brain-inspired model</p>
+<img src="https://images.unsplash.com/photo-1508385082359-f38ae991e8f2">`
 },
 
 {
 title:"Deep Learning",
 content:`<p>Advanced neural networks</p>
-<img src="https://upload.wikimedia.org/wikipedia/commons/6/63/Deep_learning.png">`
+<img src="https://images.unsplash.com/photo-1518770660439-4636190af475">`
 }
-
 ];
 
 function renderLevels(){
@@ -211,18 +207,18 @@ localStorage.setItem("progress",JSON.stringify(progress));
 function next(){if(currentLevel<9){currentLevel++;showLevel();}}
 function prev(){if(currentLevel>0){currentLevel--;showLevel();}}
 
-// QUIZ (10 QUESTIONS)
+// QUIZ
 const quiz=[
-{q:"ML stands for?",o:["Machine Learning","Mega Logic","Main Loop"],a:0},
-{q:"Supervised learning uses?",o:["Labeled data","Random","None"],a:0},
-{q:"Regression predicts?",o:["Numbers","Classes","Text"],a:0},
-{q:"Clustering is?",o:["Supervised","Unsupervised","RL"],a:1},
-{q:"Overfitting means?",o:["Memorizing","Learning","Cleaning"],a:0},
-{q:"Spam detection is?",o:["Classification","Regression","Sorting"],a:0},
-{q:"K-means is?",o:["Regression","Clustering","Sorting"],a:1},
-{q:"Neural networks inspired by?",o:["Brain","CPU","RAM"],a:0},
-{q:"Accuracy means?",o:["Correct predictions","Speed","Memory"],a:0},
-{q:"Deep learning uses?",o:["Neural nets","Trees","Arrays"],a:0}
+{q:"ML stands for?",o:["Machine Learning","Mega Logic"],a:0},
+{q:"Supervised uses?",o:["Labeled","Random"],a:0},
+{q:"Regression predicts?",o:["Number","Class"],a:0},
+{q:"Clustering?",o:["Supervised","Unsupervised"],a:1},
+{q:"Overfitting?",o:["Memorizing","Learning"],a:0},
+{q:"Spam detection?",o:["Classification","Regression"],a:0},
+{q:"K-means?",o:["Clustering","Sorting"],a:0},
+{q:"Neural nets?",o:["Brain","CPU"],a:0},
+{q:"Accuracy?",o:["Correct","Speed"],a:0},
+{q:"Deep learning?",o:["Neural nets","Trees"],a:0}
 ];
 
 function renderQuiz(){
@@ -232,11 +228,7 @@ q.o.forEach((opt,i)=>{
 let b=document.createElement("button");
 b.innerText=opt;
 b.onclick=()=>{
-if(i===q.a){
-alert("Correct");
-scoreData[currentUser]=(scoreData[currentUser]||0)+1;
-}else alert("Wrong");
-localStorage.setItem("score",JSON.stringify(scoreData));
+alert(i===q.a?"Correct":"Wrong");
 };
 quizBox.appendChild(b);
 });
@@ -250,43 +242,28 @@ else{alert("Quiz done");currentQ=0;}
 // DASHBOARD
 function renderChart(){
 let done=progress[currentUser]?progress[currentUser].length:0;
-let score=scoreData[currentUser]||0;
 let ctx=document.getElementById("chart");
 
 if(chartInstance) chartInstance.destroy();
 
 chartInstance=new Chart(ctx,{
 type:'bar',
-data:{labels:["Levels","Score"],datasets:[{data:[done,score]}]}
+data:{labels:["Levels Completed"],datasets:[{data:[done]}]}
 });
-}
-
-// CERTIFICATE
-function generateCertificate(){
-let win=window.open("");
-win.document.write(`
-<h1 style="text-align:center">Certificate</h1>
-<h2 style="text-align:center">${currentUser || "Learner"}</h2>
-<p style="text-align:center">Completed ML Platform</p>
-`);
-win.print();
 }
 
 // CHATBOT
 function sendMsg(){
 let input=chatInput.value.toLowerCase();
-let reply="Try asking about ML";
+let reply="Try ML topics";
 
 if(input.includes("ml")) reply="ML learns from data.";
-else if(input.includes("regression")) reply="Regression predicts values.";
-else if(input.includes("overfitting")) reply="Overfitting memorizes data.";
-else if(input.includes("clustering")) reply="Clustering groups data.";
+if(input.includes("regression")) reply="Predicts values.";
 
 chatBox.innerHTML+=`<p><b>You:</b> ${input}</p>`;
 chatBox.innerHTML+=`<p><b>AI:</b> ${reply}</p>`;
 chatInput.value="";
 }
-
 </script>
 
 </body>
