@@ -18,7 +18,7 @@ const levels=[
 {
 content:`<h3>ML Basics</h3>
 <div class="split">
-<div class="left"><img src="images/ml.png"></div>
+<div class="left"><img src="images/ml.jpg"></div>
 <div class="right"><iframe src="https://www.youtube.com/embed/ukzFI9rgwfU"></iframe></div>
 </div>`
 },
@@ -32,7 +32,7 @@ content:`<h3>Types</h3>
 {
 content:`<h3>Linear Regression</h3>
 <div class="split">
-<div class="left"><img src="images/linear.png"></div>
+<div class="left"><img src="images/linear.jpg"></div>
 <div class="right"><iframe src="https://www.youtube.com/embed/nk2CQITm_eo"></iframe></div>
 </div>`
 },
@@ -60,7 +60,7 @@ content:`<h3>Overfitting</h3>
 {
 content:`<h3>Clustering</h3>
 <div class="split">
-<div class="left"><img src="images/cluster.png"></div>
+<div class="left"><img src="images/cluster.webp"></div>
 <div class="right"><iframe src="https://www.youtube.com/embed/4b5d3muPQmA"></iframe></div>
 </div>`
 },
